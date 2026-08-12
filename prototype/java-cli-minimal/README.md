@@ -24,4 +24,5 @@ java -jar target/jfast-proto-0.0.1.jar \
   --group-id com.example --artifact-id demo --preset full --with-hello -o /tmp
 ```
 
-已知刻意简化(原型不追求正确性):preset=empty + withHello=true 时 pom 带 web starter 但不生成 Controller;模板无条件覆盖已有文件。
+已知刻意简化(原型不追求正确性):preset=empty + withHello=true 时 pom 带 web starter 但不生成 Controller。
+已修复的坑:**目标目录守卫** —— 覆盖生成会在旧包路径下残留过期类(Spring Boot 因多个主类拒跑),所以非空目录拒绝生成,需 `--force` 显式清目录。
