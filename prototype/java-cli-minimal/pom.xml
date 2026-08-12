@@ -25,7 +25,7 @@
         </dependency>
         <dependency>
             <groupId>org.jline</groupId>
-            <artifactId>jline-reader</artifactId>
+            <artifactId>jline-terminal</artifactId>
             <version>${jline.version}</version>
         </dependency>
         <dependency>
