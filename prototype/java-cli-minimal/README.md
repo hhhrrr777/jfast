@@ -5,7 +5,7 @@
 
 ## 验证的三个问题
 
-1. **交互手感** —— picocli(参数解析)+ JLine 4.x `jline-prompt`(Inquirer.js 风格向导)
+1. **交互手感** —— picocli(参数解析)+ 自研表单向导(基于 jline-terminal/jline-reader 原语,~200 行)。**v2 起不再用 jline-prompt**:4.3.1 的列表组件方向键渲染有 bug(`[[A`/`[[B` 乱码、Enter 失灵),且不支持「字段名在上、输入在下、末屏汇总可回改」的布局。交互形态:每项一屏清屏推进,末屏汇总全部选择,数字键回改。
 2. **模板组织方式** —— 本原型实现「目录即模板」:`src/main/resources/templates/` 镜像目标工程目录结构,walk 一遍逐个落地
 3. **打包分发** —— maven-shade 单 jar;native 本机无 GraalVM,未实测(调研结论:Rocker 路线可兑现,见下方结论)
 
