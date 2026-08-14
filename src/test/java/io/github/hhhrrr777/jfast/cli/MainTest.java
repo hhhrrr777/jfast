@@ -30,11 +30,11 @@ class MainTest {
     }
 
     @Test
-    void newCommandShellRuns() {
+    void newCommandRequiresPresetInNonTty() {
         Run result = run("new");
 
-        assertThat(result.exitCode()).isEqualTo(0);
-        assertThat(result.out()).contains("尚未实现");
+        assertThat(result.exitCode()).isEqualTo(2);
+        assertThat(result.err()).contains("--preset");
     }
 
     @Test

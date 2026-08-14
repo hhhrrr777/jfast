@@ -38,3 +38,6 @@ logs/
 tmp/
 temp/
 *.tmp
+
+# Claude Code 会话产物(skills 已跟踪,仅忽略临时 worktree)
+.claude/worktrees/

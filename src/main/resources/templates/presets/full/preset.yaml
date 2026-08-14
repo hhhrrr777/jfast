@@ -1,0 +1,18 @@
+name: full
+displayName: 完整后台
+description: 含用户/角色/菜单权限、认证、日志、字典等系统管理功能的完整应用骨架。
+questions:
+  - preset
+  - groupId
+  - artifactId
+  - basePackage
+  - jdkVersion
+  - database
+  - dbHost
+  - dbPort
+  - dbName
+  - dbUser
+  - dbPassword
+  - serverPort
+conditions:
+  systemAdmin: true
