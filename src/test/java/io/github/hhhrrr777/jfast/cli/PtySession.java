@@ -73,9 +73,11 @@ final class PtySession implements AutoCloseable {
         command[4] = "new";
         System.arraycopy(extraArgs, 0, command, 5, extraArgs.length);
 
+        // LANG 必须显式固定:CI runner 默认 POSIX/C locale,子进程会按 ASCII 编码
+        // 输出,中文提示全部退化为 ?,按输出内容驱动的断言随之超时
         PtyProcess process = new PtyProcessBuilder()
                 .setCommand(command)
-                .setEnvironment(Map.of("TERM", "xterm"))
+                .setEnvironment(Map.of("TERM", "xterm", "LANG", "en_US.UTF-8"))
                 .setDirectory(workingDir.toString())
                 .setInitialColumns(120)
                 .setInitialRows(40)

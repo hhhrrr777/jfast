@@ -12,6 +12,14 @@
   <name>jfast</name>
   <description>jfast 工程生成器 CLI</description>
 
+  <!-- pty4j 的传递依赖 purejavacomm 不在 Maven Central,需 JetBrains 仓库(仅测试期使用) -->
+  <repositories>
+    <repository>
+      <id>jetbrains-intellij-dependencies</id>
+      <url>https://packages.jetbrains.team/maven/p/ij/intellij-dependencies</url>
+    </repository>
+  </repositories>
+
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

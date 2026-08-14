@@ -1,0 +1,79 @@
+name: ci
+
+# T3 PR 门禁(ADR-0004 / ADR-0009):双 job。
+#   generator   生成器自身 `mvn verify`(JDK 21),含全部单测与 T2 集成测试。
+#   preset-gate 预设门禁矩阵:生成 → `mvn compile` → `npm run build`。
+#              本期矩阵仅 empty;full 模板化完成(S3-3)后在此扩展。
+# 步骤命名即环节名,门禁日志可直接看出失败在哪一步。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  generator:
+    name: 生成器 mvn verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: 生成器 mvn verify
+        run: mvn -B verify
+
+  preset-gate:
+    name: 预设门禁 ${{ matrix.preset }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 本期先 empty;full 模板化完成(S3-3)后加 full。
+        preset: [empty]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # 与生成物 package.json engines 对齐(Node ^20.19 或 >=22.12),取 22 LTS
+      - name: 安装 Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 构建生成器 jar
+        run: mvn -B -q package -DskipTests
+
+      - name: 生成工程(${{ matrix.preset }})
+        run: |
+          java -jar target/jfast.jar new \
+            --preset ${{ matrix.preset }} \
+            --group-id com.example \
+            --artifact-id demo \
+            --base-package com.example.demo \
+            --jdk-version 21 \
+            --database mysql \
+            --output-dir "$GITHUB_WORKSPACE/generated"
+
+      - name: 后端 mvn compile
+        working-directory: generated
+        run: mvn -B compile
+
+      - name: 前端 npm install
+        working-directory: generated
+        run: npm install --no-audit --no-fund
+
+      - name: 前端 npm run build
+        working-directory: generated
+        run: npm run build
