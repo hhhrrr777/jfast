@@ -1,0 +1,12 @@
+name: empty
+displayName: 空工程
+description: 最小应用骨架，只含前后端工程结构与基础依赖，无系统管理功能。
+questions:
+  - preset
+  - groupId
+  - artifactId
+  - basePackage
+  - jdkVersion
+  - database
+conditions:
+  systemAdmin: false

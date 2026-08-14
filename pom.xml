@@ -19,6 +19,9 @@
     <!-- 定版依据 docs/research/dependency-versions.md(ADR-0001 技术栈) -->
     <picocli.version>4.7.7</picocli.version>
     <freemarker.version>2.3.34</freemarker.version>
+    <jline.version>4.3.1</jline.version>
+    <snakeyaml.version>2.4</snakeyaml.version>
+    <pty4j.version>0.12.25</pty4j.version>
     <junit.version>5.11.4</junit.version>
     <assertj.version>3.27.3</assertj.version>
   </properties>
@@ -34,6 +37,21 @@
       <artifactId>freemarker</artifactId>
       <version>${freemarker.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline-terminal</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jline</groupId>
+      <artifactId>jline-terminal-jni</artifactId>
+      <version>${jline.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -47,11 +65,40 @@
       <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains.pty4j</groupId>
+      <artifactId>pty4j</artifactId>
+      <version>${pty4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>2.0.16</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <finalName>jfast</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <!-- 默认排除会丢掉 .gitignore 等 dot-git 测试 fixture,此处关闭 -->
+            <id>default-testResources</id>
+            <goals>
+              <goal>testResources</goal>
+            </goals>
+            <configuration>
+              <addDefaultExcludes>false</addDefaultExcludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -70,6 +117,7 @@
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>io.github.hhhrrr777.jfast.cli.Main</mainClass>
                 </transformer>
