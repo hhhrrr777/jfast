@@ -3,6 +3,10 @@ package io.github.hhhrrr777.jfast.core;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.hhhrrr777.jfast.preset.PresetLoader;
+import io.github.hhhrrr777.jfast.wizard.Answers;
+import io.github.hhhrrr777.jfast.wizard.QuestionId;
+import io.github.hhhrrr777.jfast.wizard.Questionnaire;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -75,6 +79,27 @@ class FileTreeWalkerTest {
                 .hasMessageContaining("same.txt")
                 .hasMessageContaining("fixtures/collision/base")
                 .hasMessageContaining("fixtures/collision/overlay");
+    }
+
+    @Test
+    void presetManifestIsNotCopiedIntoOutput() {
+        // 经 S1-2 契约构造真实渲染模型,base 模板引用的键才不会缺
+        Questionnaire questionnaire = Questionnaire.forPreset(new PresetLoader().load("empty"));
+        Answers answers = Answers.builder()
+                .set(QuestionId.GROUP_ID, "com.example")
+                .set(QuestionId.ARTIFACT_ID, "demo")
+                .set(QuestionId.BASE_PACKAGE, "com.example.demo")
+                .set(QuestionId.JDK_VERSION, "21")
+                .set(QuestionId.DATABASE, "mysql")
+                .build();
+        Map<String, Object> model = questionnaire.toConfiguration(answers, "unused").toRenderModel();
+
+        walker.generate(List.of("templates/base", "templates/presets/empty"), outputDir, model);
+
+        // preset.yaml 是 manifest 元数据(ADR-0004),walker 跳过不落盘
+        assertThat(outputDir.resolve("preset.yaml")).doesNotExist();
+        // base 模板照常生成
+        assertThat(outputDir.resolve("pom.xml")).exists();
     }
 
     @Test

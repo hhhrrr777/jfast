@@ -20,10 +20,17 @@ import java.util.jar.JarFile;
  * 支持开发期 classes 目录与 fat jar 内 walk;`.ftl` 后缀 opt-in 渲染并剥后缀,
  * 文件名/路径 `${}` 与内容同走渲染接缝、同一份模型;无后缀文件字节级拷贝;
  * 层间(含同层内)同输出路径撞车报错。
+ *
+ * 预设 overlay 根部的 `preset.yaml` 是 manifest 元数据(ADR-0004),非模板,
+ * 遍历时跳过、不落盘——否则 empty 这类「仅 manifest 无模板」的预设会把
+ * preset.yaml 拷进生成物。
  */
 public final class FileTreeWalker {
 
     private static final String FTL_SUFFIX = ".ftl";
+
+    /** 预设 manifest 文件名(ADR-0004),作为元数据处理、不拷入生成物。 */
+    private static final String PRESET_MANIFEST = "preset.yaml";
 
     private final TemplateEngine engine;
     private final ClassLoader classLoader;
@@ -59,6 +66,10 @@ public final class FileTreeWalker {
 
     private void writeOne(String root, String relativePath, Path outputDir,
                           Map<String, Object> model, Map<String, String> origins) {
+        // 预设 manifest 是元数据而非模板,跳过不拷入生成物(ADR-0004)
+        if (relativePath.equals(PRESET_MANIFEST)) {
+            return;
+        }
         String source = root + "/" + relativePath;
         // 文件名/路径与内容同走渲染接缝、同一份模型,先渲染再剥 .ftl 后缀
         String renderedPath = engine.render(relativePath, source + "(文件名)", model);
