@@ -1,4 +1,4 @@
-# ${project.projectName}
+# ${project.name}
 
 > 由 jfast 生成(预设:${project.preset})。
 

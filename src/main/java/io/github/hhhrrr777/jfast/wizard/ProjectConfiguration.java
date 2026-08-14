@@ -11,7 +11,8 @@ import java.util.Map;
  * @param artifactId  Maven artifactId
  * @param basePackage Java 基础包名
  * @param packagePath 包路径(basePackage 的点分段转斜杠)
- * @param projectName 工程显示名(从 artifactId 推导)
+ * @param name        工程显示名(从 artifactId 推导)
+ * @param applicationClass 主类名前缀(大驼峰,模型构造期从 artifactId 派生)
  * @param description 工程描述
  * @param jdkVersion  JDK 版本
  * @param database    数据库类型
@@ -29,7 +30,8 @@ public record ProjectConfiguration(String preset,
                                    String artifactId,
                                    String basePackage,
                                    String packagePath,
-                                   String projectName,
+                                   String name,
+                                   String applicationClass,
                                    String description,
                                    String jdkVersion,
                                    String database,
@@ -53,7 +55,8 @@ public record ProjectConfiguration(String preset,
         project.put("artifactId", artifactId);
         project.put("basePackage", basePackage);
         project.put("packagePath", packagePath);
-        project.put("projectName", projectName);
+        project.put("name", name);
+        project.put("applicationClass", applicationClass);
         project.put("description", description);
         project.put("jdkVersion", jdkVersion);
         project.put("database", database);

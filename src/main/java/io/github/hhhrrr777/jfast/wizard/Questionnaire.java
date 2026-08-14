@@ -139,7 +139,8 @@ public final class Questionnaire {
             basePackage = WizardDefaults.deriveBasePackage(groupId, artifactId);
         }
         String packagePath = basePackage.replace('.', '/');
-        String projectName = artifactId;
+        String name = artifactId;
+        String applicationClass = WizardDefaults.deriveApplicationClass(artifactId);
         String description = artifactId + " 工程";
         String jdkVersion = filled.get(QuestionId.JDK_VERSION).orElse("21");
         String database = filled.get(QuestionId.DATABASE).orElse("mysql");
@@ -157,7 +158,8 @@ public final class Questionnaire {
                 artifactId,
                 basePackage,
                 packagePath,
-                projectName,
+                name,
+                applicationClass,
                 description,
                 jdkVersion,
                 database,

@@ -61,6 +61,28 @@ public final class WizardDefaults {
         return artifactId == null ? "" : artifactId.replace("-", "_").toLowerCase();
     }
 
+    /**
+     * 从 artifactId 派生主类名前缀(大驼峰,合法 Java 标识符)。
+     * 例:demo-app → DemoApp,jfast → Jfast。artifactId 已经过 validateArtifactId 校验,
+     * 只含小写字母/数字/连字符,故派生结果必为合法类名前缀。
+     */
+    public static String deriveApplicationClass(String artifactId) {
+        if (artifactId == null || artifactId.isBlank()) {
+            return "Application";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String segment : artifactId.split("-")) {
+            if (segment.isEmpty()) {
+                continue;
+            }
+            sb.append(Character.toUpperCase(segment.charAt(0)));
+            if (segment.length() > 1) {
+                sb.append(segment.substring(1));
+            }
+        }
+        return sb.length() == 0 ? "Application" : sb.toString();
+    }
+
     public static ValidationResult validatePackageName(String value) {
         if (value == null || value.isBlank()) {
             return ValidationResult.fail("包名不能为空");

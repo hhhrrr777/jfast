@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.hhhrrr777.jfast.preset.Preset;
 import io.github.hhhrrr777.jfast.preset.PresetLoader;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class QuestionnaireTest {
@@ -126,11 +127,21 @@ class QuestionnaireTest {
         assertThat(config.artifactId()).isEqualTo("jfast-demo");
         assertThat(config.basePackage()).isEqualTo("io.github.hhhrrr777.jfastdemo");
         assertThat(config.packagePath()).isEqualTo("io/github/hhhrrr777/jfastdemo");
+        assertThat(config.name()).isEqualTo("jfast-demo");
+        assertThat(config.applicationClass()).isEqualTo("JfastDemo");
         assertThat(config.database()).isEqualTo("postgresql");
         assertThat(config.dbPort()).isEqualTo("5432");
         assertThat(config.serverPort()).isEqualTo("9090");
         assertThat(config.outputDir()).isEqualTo("./jfast-demo/");
         assertThat(config.conditions()).containsEntry("systemAdmin", true);
+
+        // 渲染模型:project.* 含契约键 name/applicationClass/packagePath,模板零裸变量
+        @SuppressWarnings("unchecked")
+        Map<String, Object> project = (Map<String, Object>) config.toRenderModel().get("project");
+        assertThat(project)
+                .containsEntry("name", "jfast-demo")
+                .containsEntry("applicationClass", "JfastDemo")
+                .containsEntry("packagePath", "io/github/hhhrrr777/jfastdemo");
     }
 
     @Test
