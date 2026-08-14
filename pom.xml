@@ -81,12 +81,6 @@
 
   <build>
     <finalName>jfast</finalName>
-    <resources>
-      <resource>
-        <directory>templates</directory>
-        <targetPath>templates</targetPath>
-      </resource>
-    </resources>
     <plugins>
       <!-- 模板树与测试 fixture 含 .gitignore 等点文件,maven-resources-plugin 默认排除需关闭(见 S1-4) -->
       <plugin>

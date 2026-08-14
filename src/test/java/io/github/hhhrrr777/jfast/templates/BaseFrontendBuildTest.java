@@ -5,6 +5,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.github.hhhrrr777.jfast.core.FileTreeWalker;
 import io.github.hhhrrr777.jfast.core.FreemarkerTemplateEngine;
+import io.github.hhhrrr777.jfast.preset.Preset;
+import io.github.hhhrrr777.jfast.preset.PresetLoader;
+import io.github.hhhrrr777.jfast.wizard.Answers;
+import io.github.hhhrrr777.jfast.wizard.QuestionId;
+import io.github.hhhrrr777.jfast.wizard.Questionnaire;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,22 +25,36 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * S1-4 验收:base 前端模板树渲染后 `npm install && npm run build` 通过。
  * 本测试需要 Node ^20.19 或 >=22.12;本地未装 Node 时跳过。
+ *
+ * base 层现含前后端模板,渲染模型走真实 Questionnaire.toConfiguration(...).toRenderModel()
+ * (S1-2 契约),不手工伪造,确保前后端模板引用的键齐全。
  */
 class BaseFrontendBuildTest {
 
     private final FileTreeWalker walker = new FileTreeWalker(new FreemarkerTemplateEngine());
+    private final PresetLoader presetLoader = new PresetLoader();
 
     @TempDir
     Path outputDir;
 
-    private static Map<String, Object> model(boolean systemAdmin) {
-        return Map.of(
-                "project", Map.of(
-                        "artifactId", "demo-app",
-                        "packageName", "com.example.demo",
-                        "packagePath", "com/example/demo"),
-                "conditions", Map.of(
-                        "systemAdmin", systemAdmin));
+    /** 经 S1-2 契约构造真实渲染模型;systemAdmin 决定走 full 还是 empty 预设。 */
+    private Map<String, Object> model(boolean systemAdmin) {
+        Preset preset = presetLoader.load(systemAdmin ? "full" : "empty");
+        Questionnaire questionnaire = Questionnaire.forPreset(preset);
+        Answers answers = Answers.builder()
+                .set(QuestionId.GROUP_ID, "com.example")
+                .set(QuestionId.ARTIFACT_ID, "demo-app")
+                .set(QuestionId.BASE_PACKAGE, "com.example.demo")
+                .set(QuestionId.JDK_VERSION, "21")
+                .set(QuestionId.DATABASE, "mysql")
+                .set(QuestionId.DB_HOST, "localhost")
+                .set(QuestionId.DB_PORT, "3306")
+                .set(QuestionId.DB_NAME, "demo_app")
+                .set(QuestionId.DB_USER, "root")
+                .set(QuestionId.DB_PASSWORD, "password123")
+                .set(QuestionId.SERVER_PORT, "8080")
+                .build();
+        return questionnaire.toConfiguration(answers, "unused").toRenderModel();
     }
 
     @Test
