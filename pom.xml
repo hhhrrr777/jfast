@@ -81,7 +81,29 @@
 
   <build>
     <finalName>jfast</finalName>
+    <resources>
+      <resource>
+        <directory>templates</directory>
+        <targetPath>templates</targetPath>
+      </resource>
+    </resources>
     <plugins>
+      <!-- 模板树与测试 fixture 含 .gitignore 等点文件,maven-resources-plugin 默认排除需关闭(见 S1-4) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <addDefaultExcludes>false</addDefaultExcludes>
+        </configuration>
+      </plugin>
+      <!-- jar 默认同样排除 .gitignore 等点文件,生成物缺它会产生未跟踪的 node_modules 噪音 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <addDefaultExcludes>false</addDefaultExcludes>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
