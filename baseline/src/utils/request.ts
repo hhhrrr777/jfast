@@ -1,4 +1,5 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { getAccessToken } from '@/utils/tokenStorage'
 
 export interface ApiResult<T = unknown> {
   code: number
@@ -51,7 +52,7 @@ function forceReLogin(): void {
 
 request.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    const token = localStorage.getItem('access_token')
+    const token = getAccessToken()
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }

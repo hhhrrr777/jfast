@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import { isLoggedIn } from '@/api/auth'
+import { hasRefreshToken } from '@/api/auth'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -44,12 +44,12 @@ const router = createRouter({
 router.beforeEach((to) => {
   if (to.meta.public) {
     // 已登录访问登录页则直接进首页
-    if (to.name === 'login' && isLoggedIn()) {
+    if (to.name === 'login' && hasRefreshToken()) {
       return { path: '/' }
     }
     return true
   }
-  if (!isLoggedIn()) {
+  if (!hasRefreshToken()) {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   return true

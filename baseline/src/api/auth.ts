@@ -1,13 +1,16 @@
 import { reactive } from 'vue'
 import request from '@/utils/request'
+import {
+  clearStoredTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveTokens
+} from '@/utils/tokenStorage'
 
 /**
- * 认证状态与令牌存储。令牌持久化在 localStorage(access/refresh 分键),
- * 供 request 拦截器读取与路由守卫判断登录态。
+ * 认证状态与令牌操作。令牌读写走 utils/tokenStorage;
+ * 供 request 拦截器与路由守卫使用。
  */
-
-const ACCESS_KEY = 'access_token'
-const REFRESH_KEY = 'refresh_token'
 
 export interface TokenResponse {
   accessToken: string
@@ -26,26 +29,22 @@ export const authState = reactive<{ user: LoginUser | null }>({
   user: null
 })
 
-export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_KEY)
-}
+export { getAccessToken, getRefreshToken }
 
-export function getRefreshToken(): string | null {
-  return localStorage.getItem(REFRESH_KEY)
-}
-
-export function isLoggedIn(): boolean {
+/**
+ * 路由守卫用的轻量登录态判断:本地是否持有 refresh token。
+ * 注意:仅判断存在性,不校验有效期——过期 token 会在首次接口调用时经 401 刷新或跳登录兜底。
+ */
+export function hasRefreshToken(): boolean {
   return !!getRefreshToken()
 }
 
 export function setTokens(token: TokenResponse): void {
-  localStorage.setItem(ACCESS_KEY, token.accessToken)
-  localStorage.setItem(REFRESH_KEY, token.refreshToken)
+  saveTokens(token.accessToken, token.refreshToken)
 }
 
 export function clearTokens(): void {
-  localStorage.removeItem(ACCESS_KEY)
-  localStorage.removeItem(REFRESH_KEY)
+  clearStoredTokens()
   authState.user = null
 }
 

@@ -2,7 +2,6 @@ package io.github.hhhrrr777.jfast.baseline.auth.controller;
 
 import io.github.hhhrrr777.jfast.baseline.auth.dto.LoginRequest;
 import io.github.hhhrrr777.jfast.baseline.auth.dto.RefreshRequest;
-import io.github.hhhrrr777.jfast.baseline.auth.model.LoginUser;
 import io.github.hhhrrr777.jfast.baseline.auth.service.AuthService;
 import io.github.hhhrrr777.jfast.baseline.auth.vo.TokenResponse;
 import io.github.hhhrrr777.jfast.baseline.common.core.AjaxResult;
@@ -53,9 +52,8 @@ public class AuthController {
 
     @Operation(summary = "当前登录信息", description = "校验 access token 并返回当前用户(需认证)")
     @GetMapping("/info")
-    public AjaxResult info() {
-        LoginUser loginUser = SecurityUtils.getLoginUser();
-        return AjaxResult.success(loginUser);
+    public AjaxResult currentUser() {
+        return AjaxResult.success(authService.currentUser(SecurityUtils.getUserId()));
     }
 
     private String clientIp(HttpServletRequest request) {

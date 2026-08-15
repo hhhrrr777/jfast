@@ -2,6 +2,7 @@ package io.github.hhhrrr777.jfast.baseline.auth.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.github.hhhrrr777.jfast.baseline.auth.dto.LoginRequest;
+import io.github.hhhrrr777.jfast.baseline.auth.vo.CurrentUserVO;
 import io.github.hhhrrr777.jfast.baseline.auth.vo.TokenResponse;
 import io.github.hhhrrr777.jfast.baseline.common.exception.ServiceException;
 import io.github.hhhrrr777.jfast.baseline.system.domain.SysRefreshToken;
@@ -55,6 +56,8 @@ public class AuthService {
             throw new ServiceException("用户名或密码错误");
         }
         if ("1".equals(user.getStatus())) {
+            // 停用账号的登录尝试同样计入失败,防止反复探测
+            loginFailureGuard.recordFailure(username);
             throw new ServiceException("账号已被停用");
         }
 
@@ -63,10 +66,7 @@ public class AuthService {
 
         SysRefreshToken refresh = refreshTokenService.issue(user.getUserId(), request.getDeviceId());
         String accessToken = tokenProvider.createAccessToken(user.getUserId(), user.getUserName());
-        return new TokenResponse(accessToken,
-                tokenProvider.getAccessTokenTtlSeconds(),
-                refresh.getToken(),
-                tokenProvider.getRefreshTokenTtlSeconds());
+        return buildTokenResponse(accessToken, refresh.getToken());
     }
 
     /**
@@ -87,10 +87,7 @@ public class AuthService {
         refreshTokenService.revoke(refreshToken);
         SysRefreshToken next = refreshTokenService.issue(user.getUserId(), current.getDeviceId());
         String accessToken = tokenProvider.createAccessToken(user.getUserId(), user.getUserName());
-        return new TokenResponse(accessToken,
-                tokenProvider.getAccessTokenTtlSeconds(),
-                next.getToken(),
-                tokenProvider.getRefreshTokenTtlSeconds());
+        return buildTokenResponse(accessToken, next.getToken());
     }
 
     /**
@@ -98,6 +95,25 @@ public class AuthService {
      */
     public void logout(String refreshToken) {
         refreshTokenService.revoke(refreshToken);
+    }
+
+    /**
+     * 当前登录用户信息(从库读取,保证昵称等字段为最新)。
+     */
+    public CurrentUserVO currentUser(Long userId) {
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new ServiceException("账号不存在", 401);
+        }
+        return new CurrentUserVO(user.getUserId(), user.getUserName(), user.getNickName());
+    }
+
+    /** 组装双 token 响应。 */
+    private TokenResponse buildTokenResponse(String accessToken, String refreshToken) {
+        return new TokenResponse(accessToken,
+                tokenProvider.getAccessTokenTtlSeconds(),
+                refreshToken,
+                tokenProvider.getRefreshTokenTtlSeconds());
     }
 
     private void updateLoginInfo(SysUser user, String loginIp) {

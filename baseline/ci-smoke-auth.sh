@@ -2,7 +2,6 @@
 # 认证域全流程 curl 冒烟(需后端已在 :8080 运行)
 set -u
 BASE=http://localhost:8080
-TMP="$(dirname "$0")"
 pass=0; fail=0
 ok()  { echo "PASS: $1"; pass=$((pass+1)); }
 bad() { echo "FAIL: $1"; fail=$((fail+1)); }
