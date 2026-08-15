@@ -2,10 +2,12 @@ package io.github.hhhrrr777.jfast.baseline.auth.controller;
 
 import io.github.hhhrrr777.jfast.baseline.auth.dto.LoginRequest;
 import io.github.hhhrrr777.jfast.baseline.auth.dto.RefreshRequest;
+import io.github.hhhrrr777.jfast.baseline.auth.model.LoginUser;
 import io.github.hhhrrr777.jfast.baseline.auth.service.AuthService;
 import io.github.hhhrrr777.jfast.baseline.auth.vo.TokenResponse;
 import io.github.hhhrrr777.jfast.baseline.common.core.AjaxResult;
 import io.github.hhhrrr777.jfast.baseline.common.utils.SecurityUtils;
+import io.github.hhhrrr777.jfast.baseline.system.service.SysMenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 认证接口:登录 / 刷新 / 登出 / 当前登录信息。
+ * 认证接口:登录 / 刷新 / 登出 / 当前登录信息 / 前端动态路由数据。
  */
 @Tag(name = "认证")
 @RestController
@@ -25,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final SysMenuService menuService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, SysMenuService menuService) {
         this.authService = authService;
+        this.menuService = menuService;
     }
 
     @Operation(summary = "登录", description = "校验防爆破与账号密码,签发 access + refresh 双 token")
@@ -50,10 +54,17 @@ public class AuthController {
         return AjaxResult.success();
     }
 
-    @Operation(summary = "当前登录信息", description = "校验 access token 并返回当前用户(需认证)")
+    @Operation(summary = "当前登录信息", description = "校验 access token 并返回当前用户与权限集合(需认证)")
     @GetMapping("/info")
     public AjaxResult currentUser() {
         return AjaxResult.success(authService.currentUser(SecurityUtils.getUserId()));
+    }
+
+    @Operation(summary = "前端动态路由数据", description = "按当前用户权限裁剪的目录/菜单树(需认证)")
+    @GetMapping("/routers")
+    public AjaxResult getRouters() {
+        LoginUser loginUser = authService.requireLoginUser(SecurityUtils.getUserId());
+        return AjaxResult.success(menuService.getRouters(loginUser.getUserId(), loginUser.isAdmin()));
     }
 
     private String clientIp(HttpServletRequest request) {

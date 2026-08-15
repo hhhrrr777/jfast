@@ -7,6 +7,12 @@ export interface ApiResult<T = unknown> {
   data: T
 }
 
+/** 分页端点的平铺响应形态(total/rows 直接在顶层)。 */
+interface TableDataShape {
+  total: number
+  rows: unknown[]
+}
+
 /**
  * axios 实例。职责:
  *  - 请求拦截:自动携带 access token;
@@ -62,8 +68,12 @@ request.interceptors.request.use(
 )
 
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResult>) => {
+  (response: AxiosResponse<ApiResult | TableDataShape>) => {
     const res = response.data
+    // 分页端点直接平铺 total/rows(非 AjaxResult 包装),视为成功
+    if (res && typeof res === 'object' && 'rows' in res && 'total' in res) {
+      return response
+    }
     if (res.code !== 200) {
       return Promise.reject(new Error(res.msg || '请求失败'))
     }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,10 +21,12 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Spring Security 配置:无状态 JWT。放行登录/刷新/Swagger,其余需认证;
+ * 按钮级权限走方法注解 @PreAuthorize("@perm.hasPermi(...)") ;
  * 认证/授权失败统一返回 AjaxResult JSON。
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;

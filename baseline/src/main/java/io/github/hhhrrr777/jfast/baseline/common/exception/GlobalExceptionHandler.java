@@ -4,6 +4,7 @@ import io.github.hhhrrr777.jfast.baseline.common.core.AjaxResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 全局异常处理:统一转为 AjaxResult。
  * 校验类异常与业务异常返回友好提示;未预期异常记日志并兜底 500。
+ * 授权异常(AccessDeniedException)向上抛给 Security 链,由 accessDeniedHandler 统一 403。
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,6 +45,12 @@ public class GlobalExceptionHandler {
     private String firstMessage(MethodArgumentNotValidException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
         return fieldError != null ? fieldError.getDefaultMessage() : "参数校验失败";
+    }
+
+    /** 授权失败(无权限):交还 Security 链,由 accessDeniedHandler 返回 403 JSON。 */
+    @ExceptionHandler(AccessDeniedException.class)
+    public void handleAccessDenied(AccessDeniedException e) {
+        throw e;
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
