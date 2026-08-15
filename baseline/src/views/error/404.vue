@@ -9,7 +9,7 @@ function goHome() {
 </script>
 
 <template>
-  <div class="not-found">
+  <div class="page-center">
     <el-result status="404" title="404" sub-title="页面不存在">
       <template #extra>
         <el-button type="primary" @click="goHome">返回首页</el-button>
@@ -17,12 +17,3 @@ function goHome() {
     </el-result>
   </div>
 </template>
-
-<style scoped>
-.not-found {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-</style>

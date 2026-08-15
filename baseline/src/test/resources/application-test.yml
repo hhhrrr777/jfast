@@ -1,0 +1,14 @@
+# 测试 profile:以 H2(MySQL 兼容模式)替代外部 MySQL,
+# 让 contextLoads 冒烟测试无需起真实数据库即可跑通。
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:jfast_baseline;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+
+mybatis-plus:
+  configuration:
+    # 测试期关闭 stdout SQL 日志,保持测试输出干净
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl

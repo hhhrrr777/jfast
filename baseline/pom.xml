@@ -13,7 +13,7 @@
 
   <groupId>io.github.hhhrrr777</groupId>
   <artifactId>jfast-baseline</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>jfast-baseline</name>
@@ -83,6 +83,13 @@
       <groupId>com.mysql</groupId>
       <artifactId>mysql-connector-j</artifactId>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- 测试期内存库:让 contextLoads 冒烟测试不依赖外部 MySQL -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
