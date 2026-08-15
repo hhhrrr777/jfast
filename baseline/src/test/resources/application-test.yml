@@ -7,8 +7,21 @@ spring:
     url: jdbc:h2:mem:jfast_baseline;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: ""
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
 
 mybatis-plus:
   configuration:
     # 测试期关闭 stdout SQL 日志,保持测试输出干净
     log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+# 测试沿用默认常量即可,此处仅显式给出密钥避免依赖外部环境
+jfast:
+  security:
+    jwt-secret: jfast-baseline-test-secret-0123456789abcdef-0123456789abcdef
+    access-token-ttl-seconds: 7200
+    refresh-token-ttl-seconds: 604800
+    login-max-fail-count: 5
+    login-lock-duration-seconds: 600

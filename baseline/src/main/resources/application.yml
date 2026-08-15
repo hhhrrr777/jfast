@@ -16,6 +16,11 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+  # 启动时执行建表脚本(幂等,CREATE TABLE IF NOT EXISTS)
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-mysql.sql
 
 mybatis-plus:
   configuration:
@@ -34,3 +39,17 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+# jfast 认证域配置(均为模板可改常量)
+jfast:
+  security:
+    # JWT 签名密钥(HS256),生产环境务必覆盖为强随机值
+    jwt-secret: jfast-baseline-dev-secret-change-me-please-0123456789abcdef
+    # access token 有效期:2 小时
+    access-token-ttl-seconds: 7200
+    # refresh token 有效期:7 天
+    refresh-token-ttl-seconds: 604800
+    # 登录防爆破:连续失败 N 次锁定
+    login-max-fail-count: 5
+    # 锁定时长:10 分钟
+    login-lock-duration-seconds: 600
