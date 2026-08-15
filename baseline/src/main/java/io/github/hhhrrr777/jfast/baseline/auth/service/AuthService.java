@@ -2,12 +2,14 @@ package io.github.hhhrrr777.jfast.baseline.auth.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.github.hhhrrr777.jfast.baseline.auth.dto.LoginRequest;
+import io.github.hhhrrr777.jfast.baseline.auth.model.LoginUser;
 import io.github.hhhrrr777.jfast.baseline.auth.vo.CurrentUserVO;
 import io.github.hhhrrr777.jfast.baseline.auth.vo.TokenResponse;
 import io.github.hhhrrr777.jfast.baseline.common.exception.ServiceException;
 import io.github.hhhrrr777.jfast.baseline.system.domain.SysRefreshToken;
 import io.github.hhhrrr777.jfast.baseline.system.domain.SysUser;
 import io.github.hhhrrr777.jfast.baseline.system.mapper.SysUserMapper;
+import io.github.hhhrrr777.jfast.baseline.system.service.SysPermissionService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +27,20 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final LoginFailureGuard loginFailureGuard;
+    private final SysPermissionService permissionService;
 
     public AuthService(SysUserMapper userMapper,
                        PasswordEncoder passwordEncoder,
                        JwtTokenProvider tokenProvider,
                        RefreshTokenService refreshTokenService,
-                       LoginFailureGuard loginFailureGuard) {
+                       LoginFailureGuard loginFailureGuard,
+                       SysPermissionService permissionService) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.refreshTokenService = refreshTokenService;
         this.loginFailureGuard = loginFailureGuard;
+        this.permissionService = permissionService;
     }
 
     /**
@@ -98,14 +103,25 @@ public class AuthService {
     }
 
     /**
-     * 当前登录用户信息(从库读取,保证昵称等字段为最新)。
+     * 当前登录用户信息(从库读取,保证昵称/权限为最新)。
      */
     public CurrentUserVO currentUser(Long userId) {
-        SysUser user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new ServiceException("账号不存在", 401);
+        LoginUser loginUser = requireLoginUser(userId);
+        return new CurrentUserVO(loginUser.getUserId(), loginUser.getUsername(),
+                loginUser.getNickName(), loginUser.getRoles(), loginUser.getPermissions());
+    }
+
+    /** 按用户ID从库装载认证主体(权限集合最新);不存在即 401。 */
+    public LoginUser requireLoginUser(Long userId) {
+        LoginUser loginUser = permissionService.loadLoginUser(userId, null);
+        if (loginUser == null) {
+            throw new ServiceException("账号不存在或已停用", 401);
         }
-        return new CurrentUserVO(user.getUserId(), user.getUserName(), user.getNickName());
+        if (loginUser.getUsername() == null) {
+            SysUser user = userMapper.selectById(userId);
+            loginUser.setUsername(user == null ? String.valueOf(userId) : user.getUserName());
+        }
+        return loginUser;
     }
 
     /** 组装双 token 响应。 */

@@ -2,6 +2,7 @@ package io.github.hhhrrr777.jfast.baseline.auth.filter;
 
 import io.github.hhhrrr777.jfast.baseline.auth.model.LoginUser;
 import io.github.hhhrrr777.jfast.baseline.auth.service.JwtTokenProvider;
+import io.github.hhhrrr777.jfast.baseline.system.service.SysPermissionService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -20,7 +21,8 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * JWT 认证过滤器:解析 Authorization: Bearer <access token>,合法则把 LoginUser 放入 SecurityContext。
+ * JWT 认证过滤器:解析 Authorization: Bearer <access token>,合法则从库装载 LoginUser
+ * (含角色与权限集合)放入 SecurityContext。每请求装载,停用用户/角色/菜单即时生效。
  * access token 无状态校验;不合法仅不设置认证(交由授权层拒绝),不在此抛错。
  */
 @Component
@@ -31,9 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String PREFIX = "Bearer ";
 
     private final JwtTokenProvider tokenProvider;
+    private final SysPermissionService permissionService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider,
+                                   SysPermissionService permissionService) {
         this.tokenProvider = tokenProvider;
+        this.permissionService = permissionService;
     }
 
     @Override
@@ -48,11 +53,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Claims claims = tokenProvider.parseAccessToken(token);
                 Long userId = Long.valueOf(claims.getSubject());
                 String username = claims.get("username", String.class);
-                LoginUser loginUser = new LoginUser(userId, username, username);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(loginUser, null, Collections.emptyList());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                LoginUser loginUser = permissionService.loadLoginUser(userId, username);
+                if (loginUser != null) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(loginUser, null, Collections.emptyList());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (JwtException | IllegalArgumentException e) {
                 log.debug("access token 校验失败: {}", e.getMessage());
             }

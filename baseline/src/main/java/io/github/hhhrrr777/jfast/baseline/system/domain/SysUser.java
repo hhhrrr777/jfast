@@ -2,13 +2,13 @@ package io.github.hhhrrr777.jfast.baseline.system.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
 /**
- * 用户信息表 sys_user。S2-2 仅承载登录认证;增删改查归 S2-3。
+ * 用户信息表 sys_user。
+ * 删除为物理删除(user_name 有唯一键,逻辑删除会导致同名重建冲突);del_flag 列仅作 schema 约定保留。
  */
 @TableName("sys_user")
 public class SysUser {
@@ -28,8 +28,7 @@ public class SysUser {
     /** 状态(0正常 1停用)。 */
     private String status;
 
-    /** 删除标志(0存在 2删除),逻辑删除。 */
-    @TableLogic(value = "0", delval = "2")
+    /** 删除标志(0存在 2删除)。仅 schema 约定,运行时物理删除,不启用逻辑删除。 */
     private String delFlag;
 
     /** 最后登录 IP。 */

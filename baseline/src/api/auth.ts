@@ -23,6 +23,8 @@ export interface LoginUser {
   userId: number
   username: string
   nickName: string
+  roles?: string[]
+  permissions?: string[]
 }
 
 export const authState = reactive<{ user: LoginUser | null }>({

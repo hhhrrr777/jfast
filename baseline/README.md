@@ -46,3 +46,13 @@ mvn spring-boot:run
 npm install
 npm run build   # 或 npm run dev 本地开发
 ```
+
+## 功能清单
+
+- **认证(S2-2)**:JWT 双 token(access 2h / refresh 7d 落库可吊销),登录/刷新/登出/当前用户;密码 BCrypt;登录防爆破。
+- **权限(S2-3)**:用户/角色/菜单三管理页 CRUD;菜单分目录/菜单/按钮三类型,驱动前端动态路由;按钮级权限——前端 `v-hasPermi` 指令裁剪 + 后端 `@PreAuthorize("@perm.hasPermi('...')")` 注解校验(每请求从库装载,停用用户/角色即时生效,超管 `*:*:*` 直通);种子含「业务功能」目录(固定 id,实体建模默认挂载点)。
+
+### 默认账号
+
+- `admin / admin123`。**首次登录后请立即修改密码**(右上角昵称下拉或「用户管理 → 重置密码」)。
+- 冒烟/测试账号不随种子落库,由集成测试与 `ci-smoke-system.sh` 按需创建。

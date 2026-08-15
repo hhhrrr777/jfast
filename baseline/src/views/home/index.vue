@@ -1,35 +1,24 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { authState, fetchCurrentUser, logout } from '@/api/auth'
-
-const router = useRouter()
-const loading = ref(true)
+import { onMounted } from 'vue'
+import { authState, fetchCurrentUser } from '@/api/auth'
 
 onMounted(async () => {
-  try {
-    await fetchCurrentUser()
-  } catch {
-    // 拦截器已处理跳转
-  } finally {
-    loading.value = false
+  // 路由守卫已保证权限装载;此处兜底刷新用户信息(如多标签页场景)
+  if (!authState.user) {
+    try {
+      await fetchCurrentUser()
+    } catch {
+      // 拦截器已处理跳转
+    }
   }
 })
-
-async function handleLogout() {
-  await logout()
-  ElMessage.success('已退出登录')
-  router.push('/login')
-}
 </script>
 
 <template>
-  <div class="page-center">
-    <el-result v-if="!loading" title="jfast-baseline" :sub-title="`欢迎,${authState.user?.nickName || authState.user?.username || ''}`">
-      <template #extra>
-        <el-button type="danger" plain @click="handleLogout">退出登录</el-button>
-      </template>
-    </el-result>
-  </div>
+  <el-card>
+    <el-result
+      title="jfast-baseline"
+      :sub-title="`欢迎,${authState.user?.nickName || authState.user?.username || ''}`"
+    />
+  </el-card>
 </template>

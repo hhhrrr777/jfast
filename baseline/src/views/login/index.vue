@@ -3,6 +3,9 @@ import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { login, fetchCurrentUser } from '@/api/auth'
+import { loadPermissions } from '@/store/permission'
+import { addDynamicRoutes } from '@/router'
+import { permissionState } from '@/store/permission'
 
 const router = useRouter()
 const route = useRoute()
@@ -27,7 +30,10 @@ async function submit() {
     loading.value = true
     try {
       await login(form.username, form.password)
-      await fetchCurrentUser()
+      // 登录后装载权限集合与动态路由再跳转
+      const user = await fetchCurrentUser()
+      await loadPermissions(user)
+      addDynamicRoutes(permissionState.routers)
       ElMessage.success('登录成功')
       const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
