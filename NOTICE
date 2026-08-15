@@ -1,0 +1,14 @@
+本项目的系统管理模块(用户/角色/菜单权限模型、操作日志切面、字典、文件上传等)
+在设计上参照了 RuoYi-Vue(https://github.com/yangzongzhuan/RuoYi-Vue),
+其版权归 RuoYi 所有,按 MIT License 发布。本项目未直接复制其源代码。
+
+Copyright (c) 2018 RuoYi (MIT License)
+
+RuoYi-Vue 许可证全文: https://github.com/yangzongzhuan/RuoYi-Vue/blob/master/LICENSE
+
+---
+
+说明:本仓库代码为按 jfast 工程规范对 RuoYi-Vue 功能设计(思想/功能设计)的重写,
+并非对其源代码的复制。参照底稿与许可证标注义务的分析见
+docs/research/ruoyi-vue-reference.md(票据 #18)。若日后确有文件改写自 RuoYi
+源码,将在该文件头补充出处标注。
